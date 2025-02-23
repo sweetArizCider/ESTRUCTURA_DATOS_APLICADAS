@@ -1,7 +1,6 @@
 import * as readline from 'readline';
 
 class Arreglo {
-    // Dimensiones del hotel
     private numPaises: number = 2;
     private numEstadosPorPais: number = 3;
     private numCiudadesPorEstado: number = 5;
@@ -9,13 +8,12 @@ class Arreglo {
     private numPisosPorTorre: number = 12;
     private numHabitacionesPorPiso: number = 20;
 
-    // Arreglo para el estado de las habitaciones (números)
     private hotel: number[][][][][][];
 
-    // Arreglo para los datos de las personas (strings)
     private persona: string[][][][][][];
 
-    // Interfaz de readline para entrada/salida
+    private arregloInicializado: boolean = false;
+
     private rl: readline.Interface;
 
     constructor() {
@@ -23,21 +21,19 @@ class Arreglo {
         this.persona = [];
         this.inicializarArreglos();
 
-        // Configurar readline
         this.rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
         });
     }
 
-    // Método para inicializar/borrar los arreglos
     public inicializarArreglos(): void {
         this.hotel = Array.from({ length: this.numPaises }, () =>
             Array.from({ length: this.numEstadosPorPais }, () =>
                 Array.from({ length: this.numCiudadesPorEstado }, () =>
                     Array.from({ length: this.numTorresPorCiudad }, () =>
                         Array.from({ length: this.numPisosPorTorre }, () =>
-                            Array.from({ length: this.numHabitacionesPorPiso }, () => 0) // 0: Desocupada
+                            Array.from({ length: this.numHabitacionesPorPiso }, () => 0) 
                         )
                     )
                 )
@@ -49,15 +45,18 @@ class Arreglo {
                 Array.from({ length: this.numCiudadesPorEstado }, () =>
                     Array.from({ length: this.numTorresPorCiudad }, () =>
                         Array.from({ length: this.numPisosPorTorre }, () =>
-                            Array.from({ length: this.numHabitacionesPorPiso }, () => "") // Datos vacíos
+                            Array.from({ length: this.numHabitacionesPorPiso }, () => "")
                         )
                     )
                 )
             )
         );
+        
     }
 
-    // Método para mostrar el menú
+   
+    
+
     public mostrarMenu(): void {
         console.log("\n--- Menú Principal ---");
         console.log("1. Inicializar/Borrar Arreglos");
@@ -67,9 +66,9 @@ class Arreglo {
         console.log("5. Mostrar ocupación de una ciudad");
         console.log("6. Cambiar de habitación");
         console.log("7. Salir");
+        console.log("8. Creditos");
     }
 
-    // Método para esperar la entrada del usuario
     public async esperarEntrada(prompt: string): Promise<string> {
         return new Promise((resolve) => {
             this.rl.question(prompt, (input) => {
@@ -77,8 +76,14 @@ class Arreglo {
             });
         });
     }
+    private validarEntrada(valor: string, min: number, max: number): number | null {
+        const num = parseInt(valor);
+        if (isNaN(num) || num < min || num > max) {
+            return null;
+        }
+        return num;
+    }
 
-    // Método para dar de alta una habitación
     public alta(
         pais: number,
         estado: number,
@@ -137,7 +142,6 @@ class Arreglo {
         }
     }
 
-    // Método para mostrar la ocupación de las torres en una ciudad
     public mostrar(pais: number, estado: number, ciudad: number): void {
         console.log(`Ocupación de las torres en País ${pais}, Estado ${estado}, Ciudad ${ciudad}:`);
         for (let torre = 0; torre < this.numTorresPorCiudad; torre++) {
@@ -153,7 +157,6 @@ class Arreglo {
         }
     }
 
-    // Método para cambiar una habitación ocupada a otra desocupada
     public cambio(
         paisInicial: number,
         estadoInicial: number,
@@ -176,56 +179,60 @@ class Arreglo {
         } else if (estadoDestinoHabitacion === 1) {
             console.log("La habitación destino está ocupada. No se puede realizar el cambio.");
         } else {
-            // Mover datos de la habitación inicial a la destino
-            this.hotel[paisDestino][estadoDestino][ciudadDestino][torreDestino][pisoDestino][habitacionDestino] = 1; // Ocupada
+            this.hotel[paisDestino][estadoDestino][ciudadDestino][torreDestino][pisoDestino][habitacionDestino] = 1; 
             this.persona[paisDestino][estadoDestino][ciudadDestino][torreDestino][pisoDestino][habitacionDestino] =
                 this.persona[paisInicial][estadoInicial][ciudadInicial][torreInicial][pisoInicial][habitacionInicial];
 
-            // Limpiar datos de la habitación inicial
-            this.hotel[paisInicial][estadoInicial][ciudadInicial][torreInicial][pisoInicial][habitacionInicial] = 0; // Desocupada
-            this.persona[paisInicial][estadoInicial][ciudadInicial][torreInicial][pisoInicial][habitacionInicial] = ""; // Limpiar datos
-
+            this.hotel[paisInicial][estadoInicial][ciudadInicial][torreInicial][pisoInicial][habitacionInicial] = 0; 
+            this.persona[paisInicial][estadoInicial][ciudadInicial][torreInicial][pisoInicial][habitacionInicial] = ""; 
             console.log("Cambio de habitación realizado exitosamente.");
         }
     }
 
-    // Método auxiliar para obtener parámetros de una habitación
     private async obtenerParametrosHabitacion(accion: string): Promise<number[] | null> {
-        console.log(`\n--- ${accion} ---`);
-        const pais = await this.esperarEntrada("País (0-1): ");
-        const estado = await this.esperarEntrada("Estado (0-2): ");
-        const ciudad = await this.esperarEntrada("Ciudad (0-4): ");
-        const torre = await this.esperarEntrada("Torre (0-2): ");
-        const piso = await this.esperarEntrada("Piso (0-11): ");
-        const habitacion = await this.esperarEntrada("Habitación (0-19): ");
-
-        if (
-            isNaN(parseInt(pais)) || isNaN(parseInt(estado)) || isNaN(parseInt(ciudad)) ||
-            isNaN(parseInt(torre)) || isNaN(parseInt(piso)) || isNaN(parseInt(habitacion))
-        ) {
-            console.log("Entrada no válida. Intente de nuevo.");
+        if (!this.arregloInicializado) {
+            console.log("❌ Primero debe inicializar los arreglos con la opción 1.");
             return null;
         }
 
-        return [parseInt(pais), parseInt(estado), parseInt(ciudad), parseInt(torre), parseInt(piso), parseInt(habitacion)];
+        console.log(`\n--- ${accion} ---`);
+
+        const pais = this.validarEntrada(await this.esperarEntrada("País (0-1): "), 0, this.numPaises - 1);
+        const estado = this.validarEntrada(await this.esperarEntrada("Estado (0-2): "), 0, this.numEstadosPorPais - 1);
+        const ciudad = this.validarEntrada(await this.esperarEntrada("Ciudad (0-4): "), 0, this.numCiudadesPorEstado - 1);
+        const torre = this.validarEntrada(await this.esperarEntrada("Torre (0-2): "), 0, this.numTorresPorCiudad - 1);
+        const piso = this.validarEntrada(await this.esperarEntrada("Piso (0-11): "), 0, this.numPisosPorTorre - 1);
+        const habitacion = this.validarEntrada(await this.esperarEntrada("Habitación (0-19): "), 0, this.numHabitacionesPorPiso - 1);
+
+        if (pais === null || estado === null || ciudad === null || torre === null || piso === null || habitacion === null) {
+            console.log("❌ Datos inválidos. Intente de nuevo.");
+            return null;
+        }
+
+        return [pais, estado, ciudad, torre, piso, habitacion];
     }
 
     // Método auxiliar para obtener parámetros de una ciudad
     private async obtenerParametrosCiudad(): Promise<number[] | null> {
-        console.log("\n--- Mostrar ocupación de una ciudad ---");
-        const pais = await this.esperarEntrada("País (0-1): ");
-        const estado = await this.esperarEntrada("Estado (0-2): ");
-        const ciudad = await this.esperarEntrada("Ciudad (0-4): ");
-
-        if (isNaN(parseInt(pais)) || isNaN(parseInt(estado)) || isNaN(parseInt(ciudad))) {
-            console.log("Entrada no válida. Intente de nuevo.");
+        if (!this.arregloInicializado) {
+            console.log("❌ Primero debe inicializar los arreglos con la opción 1.");
             return null;
         }
-
-        return [parseInt(pais), parseInt(estado), parseInt(ciudad)];
+    
+        console.log("\n--- Mostrar ocupación de una ciudad ---");
+    
+        const pais = this.validarEntrada(await this.esperarEntrada("País (0-1): "), 0, this.numPaises - 1);
+        const estado = this.validarEntrada(await this.esperarEntrada("Estado (0-2): "), 0, this.numEstadosPorPais - 1);
+        const ciudad = this.validarEntrada(await this.esperarEntrada("Ciudad (0-4): "), 0, this.numCiudadesPorEstado - 1);
+    
+        if (pais === null || estado === null || ciudad === null) {
+            console.log("❌ Datos inválidos. Intente de nuevo.");
+            return null;
+        }
+    
+        return [pais, estado, ciudad];
     }
 
-    // Método para iniciar la aplicación
     public async iniciar(): Promise<void> {
         let opcion: string;
 
@@ -234,12 +241,13 @@ class Arreglo {
             opcion = await this.esperarEntrada("Seleccione una opción: ");
 
             switch (opcion) {
-                case "1": // Inicializar/Borrar Arreglos
+                case "1": 
                     this.inicializarArreglos();
+                    this.arregloInicializado = true;
                     console.log("Arreglos inicializados/borrados correctamente.");
                     break;
 
-                case "2": // Dar de alta una habitación
+                case "2": 
                     const altaParams = await this.obtenerParametrosHabitacion("alta");
                     if (altaParams) {
                         const [pais, estado, ciudad, torre, piso, habitacion] = altaParams;
@@ -250,7 +258,7 @@ class Arreglo {
                     }
                     break;
 
-                case "3": // Dar de baja una habitación
+                case "3": 
                     const bajaParams = await this.obtenerParametrosHabitacion("baja");
                     if (bajaParams) {
                         const [pais, estado, ciudad, torre, piso, habitacion] = bajaParams;
@@ -258,7 +266,7 @@ class Arreglo {
                     }
                     break;
 
-                case "4": // Buscar una habitación
+                case "4": 
                     const buscarParams = await this.obtenerParametrosHabitacion("buscar");
                     if (buscarParams) {
                         const [pais, estado, ciudad, torre, piso, habitacion] = buscarParams;
@@ -266,7 +274,7 @@ class Arreglo {
                     }
                     break;
 
-                case "5": // Mostrar ocupación de una ciudad
+                case "5": 
                     const mostrarParams = await this.obtenerParametrosCiudad();
                     if (mostrarParams) {
                         const [pais, estado, ciudad] = mostrarParams;
@@ -274,7 +282,7 @@ class Arreglo {
                     }
                     break;
 
-                case "6": // Cambiar de habitación
+                case "6": 
                     const cambioParamsInicial = await this.obtenerParametrosHabitacion("cambio (inicial)");
                     const cambioParamsDestino = await this.obtenerParametrosHabitacion("cambio (destino)");
                     if (cambioParamsInicial && cambioParamsDestino) {
@@ -284,8 +292,16 @@ class Arreglo {
                     }
                     break;
 
-                case "7": // Salir
+                case "7": 
                     console.log("Saliendo del programa...");
+                    break;
+
+                case"8":
+                console.log("\n--- CREDITOS ---");
+                console.log("MATERIA: ESTRUCTURA DE DATOS APLICADAS");
+                console.log("INTEGRANTES:");
+                console.log("PAMELA ROBLEDO PINTO [23170048]");
+                console.log("CARLOS ARIZPE HERNANDEZ [23170205]");
                     break;
 
                 default:
@@ -294,7 +310,7 @@ class Arreglo {
             }
         } while (opcion !== "7");
 
-        this.rl.close(); // Cerrar readline al salir
+        this.rl.close(); 
     }
 }
 
