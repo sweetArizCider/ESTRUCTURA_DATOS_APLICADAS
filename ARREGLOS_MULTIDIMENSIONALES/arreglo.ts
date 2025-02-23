@@ -191,7 +191,7 @@ class Arreglo {
 
     private async obtenerParametrosHabitacion(accion: string): Promise<number[] | null> {
         if (!this.arregloInicializado) {
-            console.log("❌ Primero debe inicializar los arreglos con la opción 1.");
+            console.log("Primero debe inicializar los arreglos con la opción 1.");
             return null;
         }
 
@@ -205,7 +205,7 @@ class Arreglo {
         const habitacion = this.validarEntrada(await this.esperarEntrada("Habitación (0-19): "), 0, this.numHabitacionesPorPiso - 1);
 
         if (pais === null || estado === null || ciudad === null || torre === null || piso === null || habitacion === null) {
-            console.log("❌ Datos inválidos. Intente de nuevo.");
+            console.log("Datos inválidos. Intente de nuevo.");
             return null;
         }
 
@@ -215,7 +215,7 @@ class Arreglo {
     // Método auxiliar para obtener parámetros de una ciudad
     private async obtenerParametrosCiudad(): Promise<number[] | null> {
         if (!this.arregloInicializado) {
-            console.log("❌ Primero debe inicializar los arreglos con la opción 1.");
+            console.log("Primero debe inicializar los arreglos con la opción 1.");
             return null;
         }
     
@@ -226,7 +226,7 @@ class Arreglo {
         const ciudad = this.validarEntrada(await this.esperarEntrada("Ciudad (0-4): "), 0, this.numCiudadesPorEstado - 1);
     
         if (pais === null || estado === null || ciudad === null) {
-            console.log("❌ Datos inválidos. Intente de nuevo.");
+            console.log("Datos inválidos. Intente de nuevo.");
             return null;
         }
     
